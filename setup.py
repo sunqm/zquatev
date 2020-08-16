@@ -78,5 +78,5 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
     packages=find_packages(),
-    install_requires=['numpy>1.8,!=1.16,!=1.17'],
+    install_requires=['numpy'],
 )
