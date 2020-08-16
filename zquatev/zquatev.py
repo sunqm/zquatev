@@ -56,7 +56,7 @@ def check_kramers_structure(mat, thresh=1.e-8):
            diff4 < thresh)
     return 0
 
-def solve_KR_FCSCE(mol, fock, ova, trmaps=None, debug=False):
+def solve_KR_FCSCE(mol, fock, ova, debug=False):
     # index for kramers basis from
     # https://github.com/sunqm/pyscf/blob/master/pyscf/gto/mole.py
     trmaps = mol.time_reversal_map()
