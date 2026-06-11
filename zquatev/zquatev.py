@@ -1,7 +1,8 @@
+import os
 import ctypes
 import numpy as np
 
-libzquatev = ctypes.CDLL('libzquatev.so')
+libzquatev = ctypes.CDLL(os.path.abspath(os.path.join(__file__, '..', 'libzquatev.so')))
 
 def eigh(mat, iop=0):
     '''HC=CE'''
