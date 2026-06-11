@@ -63,7 +63,7 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 AUTHOR = ''
-PACKAGE_VERSION = '0.1'
+PACKAGE_VERSION = '0.2'
 DESCRIPTION = 'Quaternionic matrix diagonalization'
 with open('README', 'r') as f:
     LONG_DESCRIPTION = f.read()

@@ -1,21 +1,30 @@
-import numpy
-import libzquatev
+import ctypes
+import numpy as np
+
+libzquatev = ctypes.CDLL('libzquatev.so')
 
 def eigh(mat, iop=0):
     '''HC=CE'''
-    n = mat.shape[0]//2
-    fmat = mat.T.copy() # Fortran order
-    eigs = numpy.zeros(2*n,dtype=numpy.float_)
-    err = libzquatev.eigh(fmat,eigs)
-    fmat = fmat.T.copy() # convert back to C order
-    e = eigs.copy()
-    v = fmat.copy()
+    n2 = mat.shape[0]
+    n = n2 // 2
+    fmat = np.array(mat, dtype=np.complex128, order='F', copy=True)
+    eigs = np.zeros(n2, dtype=np.float64)
+    err = libzquatev.eigh(
+        fmat.ctypes, eigs.ctypes, ctypes.c_int(n2), ctypes.c_int(n2))
+    if err != 0:
+        raise RuntimeError('zquatev failed')
+
     if iop == 1:
+        e = np.empty_like(eigs)
+        v = np.empty_like(fmat)
         e[0::2] = eigs[:n]
-        e[1::2] = eigs[n:]
+        e[1::2] = eigs[:n]
         v[:,0::2] = fmat[:,:n]
         v[:,1::2] = fmat[:,n:]
-    return e,v
+    else:
+        eigs[n:] = eigs[:n]
+        e, v = eigs, fmat
+    return e, v
 
 def geigh(tfock, tova, debug=False):
     '''FC=SCE'''
