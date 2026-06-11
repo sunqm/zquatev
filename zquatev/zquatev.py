@@ -1,5 +1,6 @@
 import os
 import ctypes
+import numpy
 import numpy as np
 
 libzquatev = ctypes.CDLL(os.path.abspath(os.path.join(__file__, '..', 'libzquatev.so')))
@@ -43,7 +44,7 @@ def geigh(tfock, tova, debug=False):
 
 def check_kramers_structure(mat, thresh=1.e-8):
     print('check_kramers_structure for matrix = [A,B;C,D]')
-    n = mat.shape[0]//2;
+    n = mat.shape[0]//2
     a = mat[:n,:n]
     b = mat[:n,n:]
     c = mat[n:,:n]
