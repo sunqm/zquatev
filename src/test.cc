@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
+#include <cblas.h>
 #include "zquatev.h"
 #include "f77.h"
 
@@ -130,7 +131,9 @@ int main(int argc, char * argv[]) {
   zgemm_("C", "N", n2, n2, n2, 1.0, D.get(), n2, C.get(), n2, 0.0, E.get(), n2);
   for (int i = 0; i != n2; ++i)
     E[i+i*n2] -= eig2[i%n];
-  const double error = real(zdotc_(n2*n2, E.get(), 1, E.get(), 1));
+  complex<double> r;
+  cblas_zdotc_sub(n2*n2, E.get(), 1, E.get(), 1, &r);
+  const double error = real(r);
   // print
   cout << setprecision(5) << scientific << endl;
   cout << " * Max deviation of the eigenvalues: " << maxdev << endl;
