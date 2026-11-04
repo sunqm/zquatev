@@ -34,7 +34,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
-#include <cblas.h>
 #include "zquatev.h"
 #include "f77.h"
 
@@ -132,7 +131,7 @@ int main(int argc, char * argv[]) {
   for (int i = 0; i != n2; ++i)
     E[i+i*n2] -= eig2[i%n];
   complex<double> r;
-  cblas_zdotc_sub(n2*n2, E.get(), 1, E.get(), 1, &r);
+  zdotc_sub(n2*n2, E.get(), 1, E.get(), 1, &r);
   const double error = real(r);
   // print
   cout << setprecision(5) << scientific << endl;
