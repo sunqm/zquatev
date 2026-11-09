@@ -29,7 +29,6 @@
 // either expressed or implied, of the FreeBSD Project.
 //
 
-#include <cblas.h>
 #include "zquatev.h"
 #include "f77.h"
 #include <cassert>
@@ -65,7 +64,7 @@ void unblocked_update(const int n, complex<double>* const D0, complex<double>* c
 
       // 00
       zgemv_("C", len, len+1, 1.0, D0+k+1+(k)*ld, ld, cvec, 1, 0.0, tmp, 1);
-      cblas_zdotc_sub(len, tmp+1, 1, cvec, 1, &r);
+      zdotc_sub(len, tmp+1, 1, cvec, 1, &r);
       zaxpy_(len, -conj(tau)*0.5*r, cvec, 1, tmp+1, 1);
       zgerc_(len, len+1, -conj(tau), cvec, 1, tmp, 1, D0+k+1+(k)*ld, ld);
       zgeru_(len+1, len, -tau, tmp, 1, vec, 1, D0+(k+1)*ld+(k), ld);
@@ -114,7 +113,7 @@ void unblocked_update(const int n, complex<double>* const D0, complex<double>* c
 
       // 00
       zgemv_("C", len, len+1, 1.0, D0+k+1+(k)*ld, ld, vec, 1, 0.0, tmp, 1);
-      cblas_zdotc_sub(len, vec, 1, tmp+1, 1, &r);
+      zdotc_sub(len, vec, 1, tmp+1, 1, &r);
       zaxpy_(len, -tau*0.5*r, vec, 1, tmp+1, 1);
       zgerc_(len, len+1, -tau, vec, 1, tmp, 1, D0+k+1+(k)*ld, ld);
       zgerc_(len+1, len, -conj(tau), tmp, 1, vec, 1, D0+(k+1)*ld+(k), ld);

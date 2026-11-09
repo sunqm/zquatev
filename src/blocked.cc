@@ -29,7 +29,6 @@
 // either expressed or implied, of the FreeBSD Project.
 //
 
-#include <cblas.h>
 #include "zquatev.h"
 #include "f77.h"
 #include "supermat.h"
@@ -186,7 +185,7 @@ void panel_update(const int n, const int nb,
         zgemv_("N", len, len, -tau, D0+ld+1, ld, dnow, 1, 0.0, YD.block(0,0), 1);
         zgemv_("N", len, len, -tau, D1+ld+1, ld, dnow, 1, 0.0, YE.block(0,0), 1);
         // Updates the kth column of D due to this Householder transformation
-        cblas_zdotc_sub(len, dnow, 1, D0+1, 1, &r);
+        zdotc_sub(len, dnow, 1, D0+1, 1, &r);
         zaxpy_(len, -conj(tau)*r, dnow, 1, D0+1, 1);
       } else {
         // x = - tau W^+ v^* [see Eq.(35c)]. Note that the first k elements of v are zero
@@ -230,7 +229,7 @@ void panel_update(const int n, const int nb,
         ZE.append_column<0>(yx);
 
         // Updates the kth column of D due to this Householder transformation
-        cblas_zdotc_sub(len, dnow, 1, D0+k*ld+k+1, 1, &r);
+        zdotc_sub(len, dnow, 1, D0+k*ld+k+1, 1, &r);
         zaxpy_(len, -conj(tau)*r, dnow, 1, D0+k*ld+k+1, 1);
       }
     }
@@ -353,7 +352,7 @@ void panel_update(const int n, const int nb,
       if (k == 0) {
         // Trivial updates for the first iteration
         W.write_lastcolumn<1>(dnow, len);
-        cblas_zdotc_sub(len, W.block(0,0), 1, dnow, 1, &r);
+        zdotc_sub(len, W.block(0,0), 1, dnow, 1, &r);
         const complex<double> zz = -ctau*r;
         T.data<0,1>(0,0) = zz*T.data<0,0>(0,0) -ctau*T.data<0,2>(0,0);
         T.data<2,1>(0,0) = -ctau*T.data<2,2>(0,0);
