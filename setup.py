@@ -6,10 +6,17 @@ import subprocess
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
+from setuptools.command.bdist_wheel import bdist_wheel
 from distutils.version import LooseVersion
 
 
 # Based on https://github.com/pybind/cmake_example
+
+class PlatformWheel(bdist_wheel):
+    def get_tag(self):
+        # The native library is loaded with ctypes and has no Python ABI.
+        _, _, platform_tag = super().get_tag()
+        return 'py3', 'none', platform_tag
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -41,6 +48,8 @@ class CMakeBuild(build_ext):
 
         cmake_args = [f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}/zquatev',
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
+        if platform.system() == "Darwin":
+            cmake_args += ['-DBLA_VENDOR=Apple']
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -75,7 +84,7 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     ext_modules=[CMakeExtension('libzquatev')],
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass=dict(build_ext=CMakeBuild, bdist_wheel=PlatformWheel),
     packages=find_packages(),
     install_requires=['numpy'],
 )

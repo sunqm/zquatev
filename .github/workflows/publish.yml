@@ -1,0 +1,83 @@
+name: Publish
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-wheels:
+    name: Build ${{ matrix.build }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            build: cp311-manylinux_x86_64
+          - runner: ubuntu-24.04-arm
+            build: cp311-manylinux_aarch64
+          - runner: macos-15-intel
+            build: cp311-macosx_x86_64
+          - runner: macos-14
+            build: cp311-macosx_arm64
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==3.2.1
+      - name: Build and test wheels
+        env:
+          # One build per platform: the resulting wheel is py3-none.
+          CIBW_BUILD: ${{ matrix.build }}
+          CIBW_ARCHS: auto
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          CIBW_BEFORE_ALL_LINUX: yum install -y openblas-devel
+          CIBW_TEST_COMMAND: python -c "from zquatev.test_zquatev import test_eigh; test_eigh()"
+        run: python -m cibuildwheel --output-dir wheelhouse
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.build }}
+          path: wheelhouse/*-py3-none-*.whl
+          if-no-files-found: error
+
+  build-sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: python -m pip install build
+      - run: python -m build --sdist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  publish:
+    needs: [build-wheels, build-sdist]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v7
+        with:
+          path: dist
+          merge-multiple: true
+      - run: python -m pip install twine==6.0.1
+      - run: python -m twine check dist/*
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_NON_INTERACTIVE: "1"
+        run: python -m twine upload --verbose dist/*
