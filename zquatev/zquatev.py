@@ -1,9 +1,11 @@
 import os
 import ctypes
+import sys
 import numpy
 import numpy as np
 
-libzquatev = ctypes.CDLL(os.path.abspath(os.path.join(__file__, '..', 'libzquatev.so')))
+_library_name = 'libzquatev.dylib' if sys.platform == 'darwin' else 'libzquatev.so'
+libzquatev = ctypes.CDLL(os.path.join(os.path.dirname(os.path.abspath(__file__)), _library_name))
 
 def eigh(mat, iop=0):
     '''HC=CE'''

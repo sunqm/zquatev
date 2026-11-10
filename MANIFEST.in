@@ -1,0 +1,2 @@
+include CMakeLists.txt README README.md
+recursive-include src *.cc *.h
