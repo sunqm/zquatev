@@ -22,7 +22,7 @@ jobs:
             build: cp311-manylinux_aarch64
           - runner: macos-15-intel
             build: cp311-macosx_x86_64
-          - runner: macos-14
+          - runner: macos-15
             build: cp311-macosx_arm64
     steps:
       - uses: actions/checkout@v7
@@ -38,7 +38,10 @@ jobs:
           CIBW_ARCHS: auto
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
-          CIBW_BEFORE_ALL_LINUX: yum install -y openblas-devel
+          CIBW_BEFORE_ALL_LINUX: >-
+            yum install -y epel-release &&
+            yum-config-manager --enable epel &&
+            yum install -y openblas-devel
           CIBW_TEST_COMMAND: python -c "from zquatev.test_zquatev import test_eigh; test_eigh()"
         run: python -m cibuildwheel --output-dir wheelhouse
       - uses: actions/upload-artifact@v7
